@@ -222,7 +222,7 @@ jobs:
           git push
 
 
-  deploy_to_eks:
+  deploy_to_k8s:
     runs-on: ubuntu-latest
     needs: update_k8s_manifests
     steps:
@@ -230,10 +230,10 @@ jobs:
       # we need the updated k8s-prod yamls
         uses: actions/checkout@v4
 
-      - name: Configure kubeconfig for service account
+      - name: Configure kubeconfig for homelab
         run: |
           mkdir -p ~/.kube
-          echo "${{ secrets.EKS_SA_KUBECONFIG_B64 }}" | base64 -d > ~/.kube/config
+          echo "${{ secrets.K8S_KUBECONFIG_B64 }}" | base64 -d > ~/.kube/config
           chmod 600 ~/.kube/config
 
       - name: Verify cluster & context
@@ -242,8 +242,8 @@ jobs:
           kubectl config current-context
           kubectl get ns
 
-      - name: Deploy to EKS using service account
+      - name: Deploy to homelab Kubernetes
         run: |
-          # Uses namespace from kubeconfig context (you set prod there)
+          # Deploy to the 'prod' namespace
           kubectl apply -f k8s-prod/ -n prod
 
